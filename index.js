@@ -25,6 +25,13 @@ async function run() {
 
         const servicesCollection = database.collection('services')
         const doctorsCollection = database.collection('doctor')
+
+        const userCollection = database.collection('user')
+
+
+
+
+
         // service get api
         app.get('/services', async(req, res)=> {
             const cursor = servicesCollection.find({})
@@ -76,6 +83,43 @@ async function run() {
             //     res.json(result)
             // })
 
+    // user post api
+    app.post('/users', async(req , res) =>{
+        const user = req.body
+        const result = await userCollection.insertOne(user)
+        console.log(result)
+        res.json(result)
+    })
+
+    app.put('/users', async (req, res) => {
+        const user = req.body;
+        const filter = {email: user.email};
+        const options = { upsert: true };
+        const updateDoc = {$set: user};
+        const result = await userCollection.updateOne( filter, updateDoc, options)
+        res.json(result) 
+    })
+
+    app.put('/users/admin' , async (req, res) => {
+        const user = req.body;
+        const filter = {email: user.email }; 
+        const updateDoc = {$set: {admin: true } };
+        const result = await userCollection.updateOne(filter, updateDoc)
+        res.json(result)
+    })
+
+    app.get('/users/:email', async(req, res)=> {
+        const email= req.params.email
+        const query = {email: email}
+        const user = await userCollection.findOne(query)
+        let isAdmin = false;
+        if(user?.admin === true){
+          isAdmin = true;
+        }else{
+          isAdmin= false
+        }
+        res.json({admin : isAdmin})
+      })
 
 
 
