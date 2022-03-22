@@ -25,8 +25,10 @@ async function run() {
 
         const servicesCollection = database.collection('services')
         const doctorsCollection = database.collection('doctor')
+        const appointmentsCollection = database.collection('appointments');
 
         const userCollection = database.collection('user')
+        const reviewCollection = database.collection('review')
 
 
 
@@ -76,12 +78,12 @@ async function run() {
 
         // Delete api
             
-            // app.delete('/services/:id', async(req, res) => {
-            //     const id = req.params.id
-            //     const quary = {_id:ObjectId(id)};
-            //     const result = await servicesCollection.deleteOne(quary)
-            //     res.json(result)
-            // })
+            app.delete('/delete/:id', async(req, res) => {
+                const id = req.params.id
+                const quary = {_id:ObjectId(id)};
+                const result = await servicesCollection.deleteOne(quary)
+                res.json(result)
+            })
 
     // user post api
     app.post('/users', async(req , res) =>{
@@ -102,8 +104,10 @@ async function run() {
 
     app.put('/users/admin' , async (req, res) => {
         const user = req.body;
+        console.log('PUT' , user);
         const filter = {email: user.email }; 
-        const updateDoc = {$set: {admin: true } };
+        // const updateDoc = {$set: {admin: true } };
+        const updateDoc = {$set: {role:'admin' } };
         const result = await userCollection.updateOne(filter, updateDoc)
         res.json(result)
     })
@@ -113,7 +117,7 @@ async function run() {
         const query = {email: email}
         const user = await userCollection.findOne(query)
         let isAdmin = false;
-        if(user?.admin === true){
+        if(user?.role === 'admin'){
           isAdmin = true;
         }else{
           isAdmin= false
@@ -122,7 +126,34 @@ async function run() {
       })
 
 
-
+      app.post('/appointments', async (req, res) => {
+        const appointment = req.body;
+        const result = await appointmentsCollection.insertOne(appointment);
+        res.json(result)
+    });
+    
+    app.get('/appointments/:id', async (req, res) => {
+        const id = req.params.id;
+        const query = { _id: ObjectId(id) };
+        const result = await appointmentsCollection.findOne(query);
+        res.json(result);
+    })
+         // Review post //
+         app.post('/addReview', async (req,res)=> {
+            const review = req.body
+            const result = await reviewCollection.insertOne(review)
+            res.send(result)
+          })
+           // review get
+           app.get('/addReview/:id', async(req, res)=> {
+            const id = req.params.id;
+            console.log('geting specific service', id)
+            const quary = { _id: ObjectId(id)}
+            const result = await servicesCollection.findOne(quary)
+            res.json(result)
+           
+        })
+        
 
 
 
